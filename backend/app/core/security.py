@@ -12,23 +12,29 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
+import bcrypt
 from jose import jwt, JWTError
-from passlib.context import CryptContext
 
 from app.core.config import get_settings
 
 settings = get_settings()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # ---------- Passwords ----------
 
 def hash_password(plain_password: str) -> str:
-    return pwd_context.hash(plain_password)
+    # bcrypt operates on bytes and has a hard 72-byte input limit — our
+    # schema's max_length=128 (characters) could exceed that in bytes for
+    # non-ASCII input, so we truncate defensively rather than let bcrypt
+    # raise. This mirrors what passlib was silently handling for us.
+    password_bytes = plain_password.encode("utf-8")[:72]
+    hashed = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
+    return hashed.decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    password_bytes = plain_password.encode("utf-8")[:72]
+    return bcrypt.checkpw(password_bytes, hashed_password.encode("utf-8"))
 
 
 # ---------- JWT (contractor auth) ----------
