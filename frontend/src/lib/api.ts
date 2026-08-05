@@ -72,3 +72,32 @@ export async function uploadProjectImage(
     throw new ApiError(res.status, body.detail ?? "Image upload failed.");
   }
 }
+
+export interface ProjectStatus {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  homeowner_name: string;
+  property_location: string | null;
+  desired_timeline: string | null;
+  budget_range: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export async function getProjectStatus(
+  projectId: string,
+  claimToken: string
+): Promise<ProjectStatus> {
+  const res = await fetch(
+    `${API_URL}/projects/${projectId}/status?claim_token=${encodeURIComponent(claimToken)}`
+  );
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: "Unable to load project status." }));
+    throw new ApiError(res.status, body.detail ?? "Unable to load project status.");
+  }
+
+  return res.json();
+}
