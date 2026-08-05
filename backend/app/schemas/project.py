@@ -39,4 +39,18 @@ class ProjectCreateResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class ProjectListItem(BaseModel):
+    """Summary view for the contractor's project list — full detail
+    (images, analysis, estimate) is deliberately left for a future
+    GET /projects/{id} detail endpoint, not bloated into the list view."""
+
+    id: str
+    title: str
+    status: str
+    homeowner_name: str
+    homeowner_email: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
     

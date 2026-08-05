@@ -53,8 +53,9 @@ async def health_check():
     intentionally returns no internal details."""
     return {"status": "ok"}
 
-from app.api import projects, images, auth  # noqa: E402
+from app.api import projects, images, auth, projects_contractor  # noqa: E402
 
 app.include_router(projects.router, prefix="/projects", tags=["projects"])
 app.include_router(images.router, prefix="/projects", tags=["images"])
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(projects_contractor.router, prefix="/contractor/projects", tags=["contractor"])
