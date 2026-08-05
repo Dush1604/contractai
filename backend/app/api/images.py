@@ -33,7 +33,7 @@ async def upload_project_image(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
-    project = _get_project_or_404_by_claim(db, project_id, claim_token)
+    project = get_project_by_claim(db, project_id, claim_token)
     image = save_project_image(db=db, project=project, upload=file)
     return image
     
