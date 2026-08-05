@@ -38,6 +38,7 @@ class User(Base):
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
     email = Column(String, unique=True, nullable=False, index=True)
+    projects = relationship("Project", back_populates="contractor")
     password_hash = Column(String, nullable=False)
     role = Column(Enum(UserRole), nullable=False, default=UserRole.contractor)
     is_active = Column(Boolean, default=True, nullable=False)
@@ -49,6 +50,8 @@ class Project(Base):
     __tablename__ = "projects"
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
+    contractor_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True)
+    contractor = relationship("User", back_populates="projects")
     title = Column(String, nullable=False)
     description = Column(Text, nullable=False)
     status = Column(Enum(ProjectStatus), nullable=False, default=ProjectStatus.pending_analysis)
