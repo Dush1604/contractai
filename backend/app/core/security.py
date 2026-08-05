@@ -60,5 +60,5 @@ def generate_claim_token() -> str:
 
 
 def claim_token_expiry() -> datetime:
-    return datetime.now(timezone.utc) + timedelta(days=settings.CLAIM_LINK_EXPIRE_DAYS)
+    return datetime.utcnow() + timedelta(days=settings.CLAIM_LINK_EXPIRE_DAYS)
     
