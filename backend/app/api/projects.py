@@ -46,4 +46,15 @@ async def submit_project(
 
     project = create_project(db=db, contractor_id=contractor_id, payload=payload)
     return project
-    
+
+from app.schemas.project import ProjectStatusResponse
+from app.services.project_service import get_project_by_claim
+
+
+@router.get("/{project_id}/status", response_model=ProjectStatusResponse)
+async def get_project_status(
+    project_id: str,
+    claim_token: str,
+    db: Session = Depends(get_db),
+):
+    return get_project_by_claim(db, project_id, claim_token)

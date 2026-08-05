@@ -54,3 +54,20 @@ class ProjectListItem(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
     
+class ProjectStatusResponse(BaseModel):
+    """What a homeowner sees when checking their project's status via
+    their claim link — deliberately excludes contractor_id and other
+    internal fields."""
+
+    id: str
+    title: str
+    description: str
+    status: str
+    homeowner_name: str
+    property_location: str | None
+    desired_timeline: str | None
+    budget_range: str | None
+    created_at: datetime
+    updated_at: datetime | None
+
+    model_config = ConfigDict(from_attributes=True)
