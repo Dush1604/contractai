@@ -101,3 +101,69 @@ export async function getProjectStatus(
 
   return res.json();
 }
+
+export interface Contractor {
+  id: string;
+  email: string;
+  role: string;
+}
+
+export interface ProjectListItem {
+  id: string;
+  title: string;
+  status: string;
+  homeowner_name: string;
+  homeowner_email: string;
+  created_at: string;
+}
+
+export async function loginContractor(email: string, password: string): Promise<Contractor> {
+  const res = await fetch(`${API_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include", // send/receive the httpOnly cookie
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: "Login failed." }));
+    throw new ApiError(res.status, body.detail ?? "Login failed.");
+  }
+
+  return res.json();
+}
+
+export async function logoutContractor(): Promise<void> {
+  await fetch(`${API_URL}/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+}
+
+export async function getMyProjects(): Promise<ProjectListItem[]> {
+  const res = await fetch(`${API_URL}/contractor/projects/`, {
+    credentials: "include", // send the httpOnly cookie along with the request
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: "Unable to load projects." }));
+    throw new ApiError(res.status, body.detail ?? "Unable to load projects.");
+  }
+
+  return res.json();
+}
+
+export async function registerContractor(email: string, password: string): Promise<Contractor> {
+  const res = await fetch(`${API_URL}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: "Registration failed." }));
+    throw new ApiError(res.status, body.detail ?? "Registration failed.");
+  }
+
+  return res.json();
+}
