@@ -216,3 +216,24 @@ export async function generateEstimate(projectId: string): Promise<ProjectEstima
 
   return res.json();
 }
+
+export interface ProjectImageWithPrediction {
+  id: string;
+  original_filename: string;
+  predicted_category: string | null;
+  predicted_confidence: number | null;
+  created_at: string;
+}
+
+export async function getProjectImages(projectId: string): Promise<ProjectImageWithPrediction[]> {
+  const res = await fetch(`${API_URL}/contractor/projects/${projectId}/images`, {
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: "Unable to load images." }));
+    throw new ApiError(res.status, body.detail ?? "Unable to load images.");
+  }
+
+  return res.json();
+}

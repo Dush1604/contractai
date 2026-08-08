@@ -7,10 +7,12 @@ import {
   logoutContractor,
   analyzeProject,
   generateEstimate,
+  getProjectImages,
   ApiError,
   type ProjectListItem,
   type ProjectAnalysis,
   type ProjectEstimate,
+  type ProjectImageWithPrediction,
 } from "@/lib/api";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -29,6 +31,7 @@ function ProjectRow({ project }: { project: ProjectListItem }) {
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
   const [loadingEstimate, setLoadingEstimate] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [images, setImages] = useState<ProjectImageWithPrediction[] | null>(null);
 
   async function handleAnalyze() {
     setError(null);
@@ -60,7 +63,12 @@ function ProjectRow({ project }: { project: ProjectListItem }) {
     <>
       <tr
         className="cursor-pointer border-b border-gray-100 hover:bg-gray-50"
-        onClick={() => setExpanded((v) => !v)}
+        onClick={() => {
+          setExpanded((v) => !v);
+          if (images === null) {
+            getProjectImages(project.id).then(setImages).catch(() => setImages([]));
+          }
+        }}
       >
         <td className="py-3 pr-4 font-medium">{project.title}</td>
         <td className="py-3 pr-4 text-gray-700">
@@ -103,6 +111,29 @@ function ProjectRow({ project }: { project: ProjectListItem }) {
             </div>
 
             {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+            
+            {images && images.length > 0 && (
+              <div className="mt-4">
+                <p className="text-sm font-medium">Uploaded photos:</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {images.map((img) => (
+                    <div
+                      key={img.id}
+                      className="rounded border border-gray-200 bg-white px-2 py-1 text-xs"
+                    >
+                      <span className="text-gray-600">{img.original_filename}</span>
+                      {img.predicted_category && (
+                        <span className="ml-2 rounded bg-purple-50 px-1.5 py-0.5 font-medium text-purple-700">
+                          {img.predicted_category}
+                          {img.predicted_confidence !== null &&
+                            ` (${Math.round(img.predicted_confidence * 100)}%)`}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {analysis && (
               <div className="mt-4 space-y-2 text-sm">

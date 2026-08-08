@@ -13,7 +13,7 @@ from openai import OpenAI
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.models.models import Project, ProjectAnalysis
+from app.models.models import Project, ProjectAnalysis, ProjectImage
 
 settings = get_settings()
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
@@ -22,7 +22,7 @@ ANALYSIS_MODEL = "gpt-4o"
 
 SYSTEM_PROMPT = """You are an assistant helping a home-renovation contractor triage incoming project leads.
 
-Given a homeowner's project title and description, respond with ONLY a JSON object (no markdown, no commentary) with this exact shape:
+Given a homeowner's project title and description, and optionally a computer vision model's prediction of the project category from an uplaoded photo, respond with ONLY a JSON object (no markdown, no commentary) with this exact shape:
 
 {
   "category": "one of: Deck, Fence, Roofing, Flooring, Drywall, Landscaping, Kitchen, Bathroom, Other",
@@ -32,7 +32,7 @@ Given a homeowner's project title and description, respond with ONLY a JSON obje
   "scope_of_work": ["ordered list of concrete work items a contractor would need to perform"]
 }
 
-Be specific and grounded in what's actually described — do not invent details not implied by the input. If the description already covers something (e.g. materials, dimensions), do not ask about it again."""
+The vision model's prediction is a helpful signal but is not always correct — use your own judgment based on the description as the primary source of truth, and treat the vision prediction as a cross-check. If they disagree, prefer the description's textual detail unless the vision model's confidence is very high and the description is vague or ambiguous. Be specific and grounded in what's actually described — do not invent details not implied by the input. If the description already covers something (e.g. materials, dimensions), do not ask about it again."""
 
 
 def run_project_analysis(db: Session, project: Project) -> ProjectAnalysis:
@@ -40,7 +40,16 @@ def run_project_analysis(db: Session, project: Project) -> ProjectAnalysis:
     row for the given project. Safe to call multiple times — re-running
     replaces the previous analysis rather than duplicating it."""
 
+    images = db.query(ProjectImage).filter(ProjectImage.project_id == project.id).all()
+    vision_predictions = [
+        f"- {img.original_filename}: predicted '{img.predicted_category}' ({img.predicted_confidence:.0%} confidence)"
+        for img in images
+        if img.predicted_category is not None
+    ]
+
     user_prompt = f"Project title: {project.title}\n\nDescription: {project.description}"
+    if vision_predictions:
+        user_prompt += "\n\nComputer vision predictions from uploaded photos:\n" + "\n".join(vision_predictions)
 
     response = client.chat.completions.create(
         model=ANALYSIS_MODEL,
