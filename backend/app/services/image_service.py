@@ -29,6 +29,8 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.models.models import Project, ProjectImage
 
+from app.ml.classifier import classify_image
+
 settings = get_settings()
 
 
@@ -83,13 +85,25 @@ def save_project_image(db: Session, project: Project, upload: UploadFile) -> Pro
     with open(storage_path, "wb") as f:
         f.write(clean_bytes)
 
+    try:
+        predicted_category, predicted_confidence = classify_image(clean_bytes)
+    except Exception:
+        # Classification is a nice-to-have, not a hard requirement for
+        # a successful upload — if the model fails for any reason, the
+        # image should still save successfully rather than block the
+        # whole request.
+        predicted_category, predicted_confidence = None, None
+
     image_record = ProjectImage(
         project_id=project.id,
         storage_path=storage_path,
         original_filename=upload.filename or "unknown",
-        content_type="image/jpeg",  # always JPEG post-re-encode, regardless of original
+        content_type="image/jpeg",
         size_bytes=len(clean_bytes),
+        predicted_category=predicted_category,
+        predicted_confidence=predicted_confidence,
     )
+    
     db.add(image_record)
     db.commit()
     db.refresh(image_record)

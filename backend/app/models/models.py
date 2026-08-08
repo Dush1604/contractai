@@ -89,6 +89,8 @@ class ProjectImage(Base):
     original_filename = Column(String, nullable=False)
     content_type = Column(String, nullable=False)
     size_bytes = Column(Integer, nullable=False)
+    predicted_category = Column(String, nullable=True)
+    predicted_confidence = Column(Float, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     project = relationship("Project", back_populates="images")
