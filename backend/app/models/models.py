@@ -104,6 +104,7 @@ class ProjectAnalysis(Base):
     complexity = Column(String, nullable=True)
     missing_info = Column(Text, nullable=True)  # JSON-encoded list
     follow_up_questions = Column(Text, nullable=True)  # JSON-encoded list
+    scope_of_work = Column(Text, nullable=True)  # JSON-encoded list
     model_version = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 

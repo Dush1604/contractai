@@ -1,0 +1,10 @@
+{
+  "bathroom": 0,
+  "deck": 1,
+  "drywall": 2,
+  "fence": 3,
+  "flooring": 4,
+  "kitchen": 5,
+  "landscaping": 6,
+  "roofing": 7
+}

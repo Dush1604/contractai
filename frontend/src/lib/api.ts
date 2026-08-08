@@ -167,3 +167,52 @@ export async function registerContractor(email: string, password: string): Promi
 
   return res.json();
 }
+
+export interface ProjectAnalysis {
+  id: string;
+  category: string | null;
+  complexity: string | null;
+  missing_info: string[];
+  follow_up_questions: string[];
+  scope_of_work: string[];
+  model_version: string | null;
+}
+
+export interface ProjectEstimate {
+  id: string;
+  scope_of_work: string[];
+  estimate_min: number | null;
+  estimate_max: number | null;
+  confidence: string | null;
+  assumptions: string[];
+  risk_factors: string[];
+  approved_by_contractor: boolean;
+}
+
+export async function analyzeProject(projectId: string): Promise<ProjectAnalysis> {
+  const res = await fetch(`${API_URL}/contractor/projects/${projectId}/analyze`, {
+    method: "POST",
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: "Analysis failed." }));
+    throw new ApiError(res.status, body.detail ?? "Analysis failed.");
+  }
+
+  return res.json();
+}
+
+export async function generateEstimate(projectId: string): Promise<ProjectEstimate> {
+  const res = await fetch(`${API_URL}/contractor/projects/${projectId}/estimate`, {
+    method: "POST",
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: "Estimate generation failed." }));
+    throw new ApiError(res.status, body.detail ?? "Estimate generation failed.");
+  }
+
+  return res.json();
+}

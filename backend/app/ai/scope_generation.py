@@ -68,10 +68,11 @@ def run_project_analysis(db: Session, project: Project) -> ProjectAnalysis:
     analysis.complexity = parsed.get("complexity")
     analysis.missing_info = json.dumps(parsed.get("missing_info", []))
     analysis.follow_up_questions = json.dumps(parsed.get("follow_up_questions", []))
+    analysis.scope_of_work = json.dumps(parsed.get("scope_of_work", []))
     analysis.model_version = ANALYSIS_MODEL
 
     db.commit()
     db.refresh(analysis)
 
-    return analysis, parsed.get("scope_of_work", [])
+    return analysis
     
