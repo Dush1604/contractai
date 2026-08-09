@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+*.pyc
+storage/
+.env
+app/db/migrations/versions/__pycache__/
