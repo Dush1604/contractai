@@ -237,3 +237,24 @@ export async function getProjectImages(projectId: string): Promise<ProjectImageW
 
   return res.json();
 }
+
+export async function downloadEstimatePdf(projectId: string, projectTitle: string): Promise<void> {
+  const res = await fetch(`${API_URL}/contractor/projects/${projectId}/export-pdf`, {
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: "PDF export failed." }));
+    throw new ApiError(res.status, body.detail ?? "PDF export failed.");
+  }
+
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${projectTitle.replace(/\s+/g, "_")}_estimate.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}

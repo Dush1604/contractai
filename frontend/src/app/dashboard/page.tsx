@@ -8,6 +8,7 @@ import {
   analyzeProject,
   generateEstimate,
   getProjectImages,
+  downloadEstimatePdf,
   ApiError,
   type ProjectListItem,
   type ProjectAnalysis,
@@ -32,6 +33,19 @@ function ProjectRow({ project }: { project: ProjectListItem }) {
   const [loadingEstimate, setLoadingEstimate] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [images, setImages] = useState<ProjectImageWithPrediction[] | null>(null);
+  const [loadingPdf, setLoadingPdf] = useState(false);
+
+  async function handleDownloadPdf() {
+    setError(null);
+    setLoadingPdf(true);
+    try {
+      await downloadEstimatePdf(project.id, project.title);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "PDF export failed.");
+    } finally {
+      setLoadingPdf(false);
+    }
+  }
 
   async function handleAnalyze() {
     setError(null);
@@ -102,6 +116,13 @@ function ProjectRow({ project }: { project: ProjectListItem }) {
                 className="rounded bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
               >
                 {loadingEstimate ? "Generating..." : "Generate Estimate"}
+              </button>
+              <button
+                onClick={handleDownloadPdf}
+                disabled={loadingPdf || !estimate}
+                className="rounded bg-gray-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+              >
+                {loadingPdf ? "Preparing..." : "Download PDF"}
               </button>
               {!analysis && (
                 <span className="self-center text-xs text-gray-500">
