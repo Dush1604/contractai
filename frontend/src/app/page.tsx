@@ -5,7 +5,7 @@ import { submitProject, uploadProjectImage, ApiError, type ProjectCreatePayload 
 
 // Hardcoded for now — in a real embed, this would come from the contractor's
 // script snippet (e.g. a data attribute), not be baked into the page.
-const CONTRACTOR_ID = "11bd9186-5af8-47fd-8b4d-e7d812ebfa29";
+const CONTRACTOR_ID = "351ca811-d0db-4265-a863-54bf68e99d5b";
 
 type FormState = ProjectCreatePayload;
 
